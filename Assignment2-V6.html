@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+ 
+
+<!--title-->
+<title>Toronto Public Art</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+ 
+
+<!--Link to Leaflet CSS document-->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" />
+<!--Link to Leaflet JS API-->
+<script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"></script>
+
+<!-- Link to jQuery Toolkit    -->
+<script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+<!-- Link to my script -->
+<script src = "Assignment2.js" type = "text/javascript"/></script>
+
+    
+<!--Styling document elements, declaring the map to fill the entire page-->
+<style type="text/css">
+html { 
+  height: 100% 
+}
+body { 
+  height: 100%; 
+  margin: 0; 
+  padding: 0 
+}
+#mapDiv { 
+  width: 100%; 
+  height: 100%
+}
+</style>
+</head>
+<body>
+ 
+
+<!--Declare map div container to place the map inside on the page-->
+<div id="mapDiv"></div>
+
+
+<!--Javascript map functions-->
+<script>
+var mymap = L.map('mapDiv').setView([43.725,-79.384], 11);
+ 
+// Declaring layers to add to the map
+var BronzeLyr, AluminumLyr, MasonryLyr, GraniteLyr,
+    StainlessSteelLyr, WoodLyr, OtherLyr;
+
+// This example uses Esri World_Street_Map taken from https://leaflet-extras.github.io/leaflet-providers/preview/
+
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+	attribution: 'Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom, 2012'
+	}).addTo(mymap);
+	
+// Define content for popups
+function onEachFeature(feature, layer) {
+
+var popupContent = '<b>Title: </b>' + feature.properties.Title + '<br>' +
+   '<b>Medium: </b>' + feature.properties.Medium + '<br>';
+
+   //Add description if it's not null
+   if (feature.properties.Description) {
+      popupContent += '<b>Description: </b>' + feature.properties.Description + '<br>'
+   }
+   popupContent += '<b>Artist: </b>' + feature.properties.Artist + '<br>' +   
+   '<b>Location: </b>' + feature.properties.Location + '<br><br>' +
+   '<a href= "' + feature.properties.ImageURL + '" target="_blank">Picture</a>'
+
+layer.bindPopup(popupContent);
+}
+
+
+// This loads the GeoJSON file using jQuery
+// jQuery getJSON() method - http://api.jquery.com/jquery.getjson/
+
+$.getJSON('https://raw.githubusercontent.com/M-Isabel-CastilloPetruza/CODG136/main/TO-PublicArt.geojson', function(data) {
+
+// Creates the layers to add to the overlay layers
+loadlayers(data);
+
+
+// Create the overlay layers to be included in the layer control
+var overlayMaps = {
+    "Bronze": BronzeLyr,
+	"Aluminum" : AluminumLyr,
+	"Masonry" : MasonryLyr,
+	"Granite" : GraniteLyr,
+	"Stainless Steel" : StainlessSteelLyr,
+	"Wood" : WoodLyr,
+	"Other" : OtherLyr
+	
+};
+
+// Create the layer control, only one base layer
+L.control.layers(null, overlayMaps, {collapsed : false}).addTo(mymap);
+
+mymap.attributionControl.addAttribution('Contains information licensed under the Open Government Licence – Toronto');
+
+});
+
+</script>
+</body>
+</html>
